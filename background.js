@@ -1,8 +1,8 @@
 const filter = {
     url: [
         {hostEquals: 'teams.microsoft.com', pathPrefix: '/dl/launcher/'},
-        {hostEquals: 'linkedin.zoom.us', pathPrefix: '/j/'},
-        {hostPrefix: 'vpn-', hostSuffix: '.corp.linkedin.com', pathEquals: '/SAML20/SP/ACS'},
+        {hostSuffix: '.zoom.us', pathPrefix: '/j/'},
+        {pathEquals: '/SAML20/SP/ACS'},
     ],
 };
 
