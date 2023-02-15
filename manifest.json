@@ -1,0 +1,15 @@
+{
+    "manifest_version": 3,
+    "name": "Launcher Tab Closer",
+    "version": "0.0.1",
+  
+    "description": "Close leftover tabs from Teams, Zoom and Global Protect.",
+  
+    "permissions": [
+        "tabs",
+        "webNavigation"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    }  
+}
