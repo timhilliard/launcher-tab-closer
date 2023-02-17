@@ -6,16 +6,16 @@ const filter = {
     ],
 };
 
+// sleep time expects milliseconds
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 chrome.webNavigation.onCompleted.addListener((tab) => {
     // Handle a browser navagiation event
     let newUrl = new URL(tab.url)
     console.debug(tab)
     console.debug(newUrl)
-
-    // sleep time expects milliseconds
-    function sleep (time) {
-        return new Promise((resolve) => setTimeout(resolve, time));
-    }
 
     // We sleep for a second before closing the tab to let any meta content
     // execute like opening zoom or teams
