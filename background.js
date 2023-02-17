@@ -13,10 +13,9 @@ function sleep (time) {
 
 chrome.webNavigation.onCompleted.addListener((tab) => {
     if (tab.frameId === 0) {
-        // Handle a browser navagiation event
-        let newUrl = new URL(tab.url)
+        // Handle a browser navigation event
         console.debug(tab)
-        console.debug(newUrl)
+        console.debug(new URL(tab.url))
 
         // We sleep for a second before closing the tab to let any meta content
         // execute like opening zoom or teams
