@@ -6,21 +6,22 @@ const filter = {
     ],
 };
 
+// sleep time expects milliseconds
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 chrome.webNavigation.onCompleted.addListener((tab) => {
-    // Handle a browser navagiation event
-    let newUrl = new URL(tab.url)
-    console.debug(tab)
-    console.debug(newUrl)
+    if (tab.frameId === 0) {
+        // Handle a browser navigation event
+        console.debug(tab)
+        console.debug(new URL(tab.url))
 
-    // sleep time expects milliseconds
-    function sleep (time) {
-        return new Promise((resolve) => setTimeout(resolve, time));
+        // We sleep for a second before closing the tab to let any meta content
+        // execute like opening zoom or teams
+        sleep(2000).then(() => {
+            console.log(`Auto closing tab ${tab.url}`)
+            chrome.tabs.remove([tab.tabId])
+        })
     }
-
-    // We sleep for a second before closing the tab to let any meta content
-    // execute like opening zoom or teams
-    sleep(2000).then(() => {
-        console.log(`Auto closing tab ${tab.url}`)
-        chrome.tabs.remove([tab.tabId])
-    })
 }, filter);
