@@ -15,10 +15,9 @@ chrome.webNavigation.onCompleted.addListener((tab) => {
     if (tab.frameId === 0) {
         // Handle a browser navigation event
         console.debug(tab)
-        console.debug(new URL(tab.url))
 
-        // We sleep for a second before closing the tab to let any meta content
-        // execute like opening zoom or teams
+        // We sleep for a two seconds before closing the tab to let any meta
+        // content execute like opening zoom or teams
         sleep(2000).then(() => {
             console.log(`Auto closing tab ${tab.url}`)
             chrome.tabs.remove([tab.tabId])
