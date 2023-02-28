@@ -15,9 +15,7 @@ function onError(e) {
 
 function autoCloseHandler(navEvent) {
     // Handle a browser navagiation event
-    let newUrl = new URL(navEvent.url)
     console.debug(navEvent)
-    console.debug(newUrl)
 
     // We sleep for a second before closing the tab to let any meta content
     // execute like opening zoom or teams
@@ -28,8 +26,4 @@ function autoCloseHandler(navEvent) {
     })
 }
 
-function main() {
-    browser.webNavigation.onCompleted.addListener(autoCloseHandler, {url: autoCloseDomainFilters})
-}
-
-main()
+browser.webNavigation.onCompleted.addListener(autoCloseHandler, {url: autoCloseDomainFilters})
