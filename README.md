@@ -5,7 +5,7 @@ Automatically cleans up tabs left behind when opening teams and zoom meetings as
 ## Branches
 
 - **main**: Manifest V3 for use with Chrome/Edge
-- **manifest-v2**: Manifest V2 for use with Firefox
+- **firefox**: Manifest V2 for use with Firefox
 
 ## Icons
 
