@@ -1,0 +1,17 @@
+{
+    "type": "object",
+    "properties": {
+        "globalprotectdomains": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "zoomdomains": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    }
+}

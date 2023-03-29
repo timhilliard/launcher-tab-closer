@@ -76,6 +76,8 @@
         <th>&nbsp;</th>
         <th>Item</th>
         <th>Delay</th>
+        <th>Domains Filter*</th>
+        <th>Managed Domains Filter*<br/>(Set by Enterprise Policy)</th>
         <th>Description</th>
     </tr>
     <tr>
@@ -90,6 +92,12 @@
         </td>
         <td>
             <input type="number" id="globalprotect-delay" min="1" max="5"> s
+        </td>
+        <td>
+            <textarea id="globalprotect-domains"></textarea>
+        </td>
+        <td>
+            <textarea id="globalprotect-managed-domains" disabled="true"></textarea>
         </td>
         <td>
             <p>Matches URLs where the path ends with /SAML20/SP/ACS</p>
@@ -110,6 +118,12 @@
             <input type="number" id="zoom-delay" min="1" max="5"> s
         </td>
         <td>
+            <textarea id="zoom-domains"></textarea>
+        </td>
+        <td>
+            <textarea id="zoom-managed-domains" disabled="true"></textarea>
+        </td>
+        <td>
             <p>Matches URLs where the domain ends with .zoom.us</p>
         </td>
     </tr>
@@ -128,11 +142,19 @@
             <input type="number" id="teams-delay" min="1" max="5"> s
         </td>
         <td>
+            &nbsp;
+        </td>
+        <td>
+            &nbsp;
+        </td>
+        <td>
             <p>Matches URLs where the domain equals teams.microsoft.com</p>
         </td>
     </tr>
 </table>
 
+<br/>
+<p>* Domains filter can either be an exact match or with a wildcard to do subdomain matching. Wildcard can only be at the start. Do not add a full URL, only a domain will be matched.<br/>(e.g. subdomain.example.com OR *.example.com)</p>
 <br/>
 
 <div id="status"></div>
