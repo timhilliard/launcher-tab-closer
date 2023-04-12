@@ -99,12 +99,14 @@ function reload_config() {
 }
 
 chrome.runtime.onInstalled.addListener(function () {
+    console.debug("chrome.runtime.onInstalled fired, reloading config");
     // Initialize configs
     reload_config();
 });
 
 // Start observing policy changes.
 chrome.storage.onChanged.addListener(function () {
+    console.debug("chrome.storage.onChanged fired, reloading config");
     reload_config();
 });
 
@@ -149,3 +151,6 @@ chrome.webNavigation.onCompleted.addListener((tab) => {
         }
     }
 }, filter);
+
+// Initialize configs
+reload_config();
