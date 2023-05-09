@@ -125,7 +125,7 @@ chrome.webNavigation.onCompleted.addListener((tab) => {
                 chrome.tabs.remove([tab.tabId])
             })
         } else if (configs.zoom.enabled && url.hostname.endsWith(".zoom.us")) {
-            if (configs.zoom.domains.length > 0) {
+            if (configs.zoom.domains.size > 0) {
                 if (!validate_domain(url.hostname, configs.zoom.domains)) {
                     console.debug("Domain does not match config, skipping...")
                     return;
@@ -137,7 +137,7 @@ chrome.webNavigation.onCompleted.addListener((tab) => {
                 chrome.tabs.remove([tab.tabId])
             })
         } else if (configs.globalprotect.enabled && url.pathname == "/SAML20/SP/ACS") {
-            if (configs.globalprotect.domains.length > 0) {
+            if (configs.globalprotect.domains.size > 0) {
                 if (!validate_domain(url.hostname, configs.globalprotect.domains)) {
                     console.debug("Domain does not match config, skipping...")
                     return;
