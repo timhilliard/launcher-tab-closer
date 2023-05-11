@@ -1,5 +1,7 @@
 # Launcher Tab Closer
 
+![example workflow](https://github.com/timhilliard/launcher-tab-closer/actions/workflows/test.yml/badge.svg)
+
 Automatically cleans up tabs left behind when opening teams and zoom meetings as well as the sso callback pages left by global protect.
 
 ## Branches
