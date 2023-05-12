@@ -89,39 +89,42 @@ function calculateDomain(userDomains, managedDomains) {
   return _union;
 }
 
-/** Regenerate the config */
+/** Regenerate the config
+ * @return {Promise} promise resolved once config has been reloaded
+ */
 function reloadConfig() {
-  chrome.storage.local.get({
-    teams: true,
-    teamsdelay: 2,
-    zoom: true,
-    zoomdelay: 2,
-    zoomdomains: [],
-    globalprotect: true,
-    globalprotectdelay: 2,
-    globalprotectdomains: [],
-  }, function(items) {
-    configs.teams.enabled = items.teams;
-    configs.teams.delay = items.teamsdelay;
-    configs.zoom.enabled = items.zoom;
-    configs.zoom.delay = items.zoomdelay;
-    configs.zoom.user_domains = items.zoomdomains;
-    configs.globalprotect.enabled = items.globalprotect;
-    configs.globalprotect.delay = items.globalprotectdelay;
-    configs.globalprotect.user_domains = items.globalprotectdomains;
+  return Promise.all(
+      [
+        chrome.storage.local.get({
+          teams: true,
+          teamsdelay: 2,
+          zoom: true,
+          zoomdelay: 2,
+          zoomdomains: [],
+          globalprotect: true,
+          globalprotectdelay: 2,
+          globalprotectdomains: [],
+        }).then((items) => {
+          configs.teams.enabled = items.teams;
+          configs.teams.delay = items.teamsdelay;
+          configs.zoom.enabled = items.zoom;
+          configs.zoom.delay = items.zoomdelay;
+          configs.zoom.user_domains = items.zoomdomains;
+          configs.globalprotect.enabled = items.globalprotect;
+          configs.globalprotect.delay = items.globalprotectdelay;
+          configs.globalprotect.user_domains = items.globalprotectdomains;
+        }),
+        chrome.storage.managed.get({
+          zoomdomains: [],
+          globalprotectdomains: [],
+        }).then(() => function(items) {
+          configs.zoom.managed_domains = items.zoomdomains;
+          configs.globalprotect.managed_domains = items.globalprotectdomains;
+        })]).then( () => {
     calculateDomains();
+    console.debug('Reloaded config');
+    console.debug(configs);
   });
-
-  chrome.storage.managed.get({
-    zoomdomains: [],
-    globalprotectdomains: [],
-  }, function(items) {
-    configs.zoom.managed_domains = items.zoomdomains;
-    configs.globalprotect.managed_domains = items.globalprotectdomains;
-    calculateDomains();
-  });
-  console.debug('Reloaded config');
-  console.debug(configs);
 }
 
 /** Regenerate the config when extension is installed */
@@ -137,48 +140,49 @@ chrome.storage.onChanged.addListener(function() {
   reloadConfig();
 });
 
+// Initialize configs, before registering the navigation listener
+reloadConfig().then( () => {
 /** Main listener for new tabs to take action on */
-chrome.webNavigation.onCompleted.addListener((tab) => {
-  if (tab.frameId === 0) {
+  chrome.webNavigation.onCompleted.addListener((tab) => {
+    if (tab.frameId === 0) {
     // Handle a browser navigation event
-    console.debug(tab);
-    console.debug(configs);
+      console.debug(tab);
+      console.debug(configs);
 
-    const url = new URL(tab.url);
+      const url = new URL(tab.url);
 
-    if (configs.teams.enabled && url.hostname == 'teams.microsoft.com') {
-      console.debug(`Auto closing teams tab ${tab.url} in ${configs.teams.delay} seconds`);
-      sleep(configs.teams.delay).then(() => {
-        console.log(`Auto closing teams tab ${tab.url}`);
-        chrome.tabs.remove([tab.tabId]);
-      });
-    } else if (configs.zoom.enabled && url.hostname.endsWith('.zoom.us')) {
-      if (configs.zoom.domains.size > 0) {
-        if (!validateDomain(url.hostname, configs.zoom.domains)) {
-          console.debug('Domain does not match config, skipping...');
-          return;
-        }
-        console.debug(`Auto closing zoom tab ${tab.url} in ${configs.zoom.delay} seconds`);
-        sleep(configs.zoom.delay).then(() => {
-          console.log(`Auto closing zoom tab ${tab.url}`);
+      if (configs.teams.enabled && url.hostname == 'teams.microsoft.com') {
+        console.debug(`Auto closing teams tab ${tab.url} in ${configs.teams.delay} seconds`);
+        sleep(configs.teams.delay).then(() => {
+          console.log(`Auto closing teams tab ${tab.url}`);
           chrome.tabs.remove([tab.tabId]);
         });
-      }
-    } else if (configs.globalprotect.enabled && url.pathname == '/SAML20/SP/ACS') {
-      if (configs.globalprotect.domains.size > 0) {
-        if (!validateDomain(url.hostname, configs.globalprotect.domains)) {
-          console.debug('Domain does not match config, skipping...');
-          return;
+      } else if (configs.zoom.enabled && url.hostname.endsWith('.zoom.us')) {
+        if (configs.zoom.domains.size > 0) {
+          if (!validateDomain(url.hostname, configs.zoom.domains)) {
+            console.debug('Domain does not match config, skipping...');
+            return;
+          }
+          console.debug(`Auto closing zoom tab ${tab.url} in ${configs.zoom.delay} seconds`);
+          sleep(configs.zoom.delay).then(() => {
+            console.log(`Auto closing zoom tab ${tab.url}`);
+            chrome.tabs.remove([tab.tabId]);
+          });
         }
-        console.debug(`Auto closing global protect tab ${tab.url} in ${configs.globalprotect.delay} seconds`);
-        sleep(configs.globalprotect.delay).then(() => {
-          console.log(`Auto closing global protect tab ${tab.url}`);
-          chrome.tabs.remove([tab.tabId]);
-        });
+      } else if (configs.globalprotect.enabled && url.pathname == '/SAML20/SP/ACS') {
+        if (configs.globalprotect.domains.size > 0) {
+          if (!validateDomain(url.hostname, configs.globalprotect.domains)) {
+            console.debug('Domain does not match config, skipping...');
+            return;
+          }
+          console.debug(`Auto closing global protect tab ${tab.url} in ${configs.globalprotect.delay} seconds`);
+          sleep(configs.globalprotect.delay).then(() => {
+            console.log(`Auto closing global protect tab ${tab.url}`);
+            chrome.tabs.remove([tab.tabId]);
+          });
+        }
       }
     }
-  }
-}, filter);
+  }, filter);
+});
 
-// Initialize configs
-reloadConfig();
