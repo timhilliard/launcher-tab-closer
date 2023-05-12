@@ -129,10 +129,11 @@ async function reloadConfig() {
  * @param {int} delay - in seconds to wait before closing
  * @param {string} tabType - helper string to identify where close came from
  * @param {object} tab - tab object to close
+ * @return {Promise}
  */
-function closeTab(delay, tabType, tab) {
+async function closeTab(delay, tabType, tab) {
   console.debug(`Auto closing ${tabType} tab ${tab.url} in ${delay} seconds`);
-  new Promise((resolve) => setTimeout(resolve, delay * 1000)).then(() => {
+  return new Promise((resolve) => setTimeout(resolve, delay * 1000)).then(() => {
     console.log(`Auto closing ${tabType} tab ${tab.url}`);
     chrome.tabs.remove([tab.tabId]);
   });
@@ -170,14 +171,14 @@ chrome.webNavigation.onCompleted.addListener(async (tab) => {
     const url = new URL(tab.url);
 
     if (configs.teams.enabled && url.hostname == 'teams.microsoft.com') {
-      closeTab(configs.teams.delay, 'teams', tab);
+      await closeTab(configs.teams.delay, 'teams', tab);
     } else if (configs.zoom.enabled && url.hostname.endsWith('.zoom.us')) {
       console.debug(`Processing zoom url ${tab.url}`);
       if (configs.zoom.domains.size > 0) {
         if (!validateDomain(url.hostname, configs.zoom.domains)) {
           console.debug('Domain does not match config, skipping...');
         } else {
-          closeTab(configs.zoom.delay, 'zoom', tab);
+          await closeTab(configs.zoom.delay, 'zoom', tab);
         }
       } else {
         console.debug('No config detected for zoom, skipping...');
@@ -187,7 +188,7 @@ chrome.webNavigation.onCompleted.addListener(async (tab) => {
         if (!validateDomain(url.hostname, configs.globalprotect.domains)) {
           console.debug('Domain does not match config, skipping...');
         } else {
-          closeTab(configs.globalprotect.delay, 'global protect', tab);
+          await closeTab(configs.globalprotect.delay, 'global protect', tab);
         }
       } else {
         console.debug('No config detected for global protect, skipping...');
