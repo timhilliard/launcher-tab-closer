@@ -158,24 +158,24 @@ chrome.webNavigation.onCompleted.addListener((tab) => {
           console.debug('Domain does not match config, skipping...');
           return;
         }
+        console.debug(`Auto closing zoom tab ${tab.url} in ${configs.zoom.delay} seconds`);
+        sleep(configs.zoom.delay).then(() => {
+          console.log(`Auto closing zoom tab ${tab.url}`);
+          chrome.tabs.remove([tab.tabId]);
+        });
       }
-      console.debug(`Auto closing zoom tab ${tab.url} in ${configs.zoom.delay} seconds`);
-      sleep(configs.zoom.delay).then(() => {
-        console.log(`Auto closing zoom tab ${tab.url}`);
-        chrome.tabs.remove([tab.tabId]);
-      });
     } else if (configs.globalprotect.enabled && url.pathname == '/SAML20/SP/ACS') {
       if (configs.globalprotect.domains.size > 0) {
         if (!validateDomain(url.hostname, configs.globalprotect.domains)) {
           console.debug('Domain does not match config, skipping...');
           return;
         }
+        console.debug(`Auto closing global protect tab ${tab.url} in ${configs.globalprotect.delay} seconds`);
+        sleep(configs.globalprotect.delay).then(() => {
+          console.log(`Auto closing global protect tab ${tab.url}`);
+          chrome.tabs.remove([tab.tabId]);
+        });
       }
-      console.debug(`Auto closing global protect tab ${tab.url} in ${configs.globalprotect.delay} seconds`);
-      sleep(configs.globalprotect.delay).then(() => {
-        console.log(`Auto closing global protect tab ${tab.url}`);
-        chrome.tabs.remove([tab.tabId]);
-      });
     }
   }
 }, filter);
