@@ -6,7 +6,6 @@
     "description": "Close leftover tabs from Teams, Zoom and Global Protect.",
   
     "permissions": [
-        "alarms",
         "tabs",
         "webNavigation",
         "storage"
