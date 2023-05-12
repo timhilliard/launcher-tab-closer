@@ -19,7 +19,6 @@ const configs = {
     managed_domains: [],
     managed_domains_loaded: false,
     domains: new Set(),
-    loaded: false,
   },
   globalprotect: {
     enabled: true,
@@ -29,19 +28,8 @@ const configs = {
     managed_domains: [],
     managed_domains_loaded: false,
     domains: new Set(),
-    loaded: false,
   },
 };
-
-/**
- * Sets a sleep interval to execute a command
- * @param {int} time - number of seconds to wait
- * @return {Promise}
- */
-function sleep(time) {
-  // Convert sleep time in seconds to milliseconds for use in setTimeout
-  return new Promise((resolve) => setTimeout(resolve, time * 1000));
-}
 
 /**
  * Validate if a domain matches any of the set of rules
@@ -71,29 +59,17 @@ function validateDomain(domain, rules) {
  * Joins user defined and managed domains
  */
 function calculateDomains() {
-  if (!configs.zoom.user_domains_loaded || !configs.zoom.managed_domains_loaded) {
-    console.debug('Zoom user or managed configs not yet loaded');
-    console.debug(configs.zoom);
-  } else {
-    configs.zoom.domains = calculateDomain(
-        configs.zoom.user_domains,
-        configs.zoom.managed_domains,
-    );
-    configs.zoom.loaded = true;
-    console.debug('Zoom configs loaded');
-  }
+  configs.zoom.domains = calculateDomain(
+      configs.zoom.user_domains,
+      configs.zoom.managed_domains,
+  );
+  console.debug('Zoom configs loaded');
 
-  if (!configs.globalprotect.user_domains_loaded || !configs.globalprotect.managed_domains_loaded) {
-    console.debug('Global Protect user or managed configs not yet loaded');
-    console.debug(configs.globalprotect);
-  } else {
-    configs.globalprotect.domains = calculateDomain(
-        configs.globalprotect.user_domains,
-        configs.globalprotect.managed_domains,
-    );
-    configs.globalprotect.loaded = true;
-    console.debug('Global Protect configs loaded');
-  }
+  configs.globalprotect.domains = calculateDomain(
+      configs.globalprotect.user_domains,
+      configs.globalprotect.managed_domains,
+  );
+  console.debug('Global Protect configs loaded');
 }
 
 /**
@@ -127,12 +103,9 @@ async function reloadConfig() {
     configs.zoom.enabled = items.zoom;
     configs.zoom.delay = items.zoomdelay;
     configs.zoom.user_domains = items.zoomdomains;
-    configs.zoom.user_domains_loaded = true;
     configs.globalprotect.enabled = items.globalprotect;
     configs.globalprotect.delay = items.globalprotectdelay;
     configs.globalprotect.user_domains = items.globalprotectdomains;
-    configs.globalprotect.user_domains_loaded = true;
-    calculateDomains();
     console.debug('Local config loaded');
   });
 
@@ -141,16 +114,28 @@ async function reloadConfig() {
     globalprotectdomains: [],
   }).then((items) => {
     configs.zoom.managed_domains = items.zoomdomains;
-    configs.zoom.managed_domains_loaded = true;
     configs.globalprotect.managed_domains = items.globalprotectdomains;
-    configs.globalprotect.managed_domains_loaded = true;
-    calculateDomains();
     console.debug('Managed config loaded');
   });
   await localLoaded;
   await managedLoaded;
+  calculateDomains();
   console.debug('Reloaded config');
   console.debug(configs);
+}
+
+/**
+ * Set a tab to close with a certain delay
+ * @param {int} delay - in seconds to wait before closing
+ * @param {string} tabType - helper string to identify where close came from
+ * @param {object} tab - tab object to close
+ */
+function closeTab(delay, tabType, tab) {
+  console.debug(`Auto closing ${tabType} tab ${tab.url} in ${delay} seconds`);
+  new Promise((resolve) => setTimeout(resolve, delay * 1000)).then(() => {
+    console.log(`Auto closing ${tabType} tab ${tab.url}`);
+    chrome.tabs.remove([tab.tabId]);
+  });
 }
 
 /** Regenerate the config when extension is installed */
@@ -169,12 +154,6 @@ chrome.storage.onChanged.addListener(function() {
 /** Main listener for new tabs to take action on */
 chrome.webNavigation.onCompleted.addListener(async (tab) => {
   if (tab.frameId === 0) {
-    // Handle a browser navigation event
-    console.debug(tab);
-    console.debug(configs);
-
-    const url = new URL(tab.url);
-
     // Make sure configs are loaded before running
     try {
       console.debug('Waiting for config to load');
@@ -185,23 +164,20 @@ chrome.webNavigation.onCompleted.addListener(async (tab) => {
       console.error(`Unable to load configs: ${e}`);
     }
 
+    console.debug(tab);
+    console.debug(configs);
+
+    const url = new URL(tab.url);
+
     if (configs.teams.enabled && url.hostname == 'teams.microsoft.com') {
-      console.debug(`Auto closing teams tab ${tab.url} in ${configs.teams.delay} seconds`);
-      sleep(configs.teams.delay).then(() => {
-        console.log(`Auto closing teams tab ${tab.url}`);
-        chrome.tabs.remove([tab.tabId]);
-      });
+      closeTab(configs.teams.delay, 'teams', tab);
     } else if (configs.zoom.enabled && url.hostname.endsWith('.zoom.us')) {
       console.debug(`Processing zoom url ${tab.url}`);
       if (configs.zoom.domains.size > 0) {
         if (!validateDomain(url.hostname, configs.zoom.domains)) {
           console.debug('Domain does not match config, skipping...');
         } else {
-          console.debug(`Auto closing zoom tab ${tab.url} in ${configs.zoom.delay} seconds`);
-          sleep(configs.zoom.delay).then(() => {
-            console.log(`Auto closing zoom tab ${tab.url}`);
-            chrome.tabs.remove([tab.tabId]);
-          });
+          closeTab(configs.zoom.delay, 'zoom', tab);
         }
       } else {
         console.debug('No config detected for zoom, skipping...');
@@ -211,11 +187,7 @@ chrome.webNavigation.onCompleted.addListener(async (tab) => {
         if (!validateDomain(url.hostname, configs.globalprotect.domains)) {
           console.debug('Domain does not match config, skipping...');
         } else {
-          console.debug(`Auto closing global protect tab ${tab.url} in ${configs.globalprotect.delay} seconds`);
-          sleep(configs.globalprotect.delay).then(() => {
-            console.log(`Auto closing global protect tab ${tab.url}`);
-            chrome.tabs.remove([tab.tabId]);
-          });
+          closeTab(configs.globalprotect.delay, 'global protect', tab);
         }
       } else {
         console.debug('No config detected for global protect, skipping...');
@@ -227,3 +199,8 @@ chrome.webNavigation.onCompleted.addListener(async (tab) => {
 // Initialize configs
 console.debug('Initializing config');
 const initConfig = reloadConfig();
+
+/** Open the options page if the icon is clicked */
+chrome.action.onClicked.addListener(() => {
+  chrome.runtime.openOptionsPage();
+});
