@@ -11,3 +11,5 @@ parserOptions:
   sourceType: module
 rules:
   max-len: 0
+plugins:
+  - eslint-plugin-jsdoc

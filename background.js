@@ -3,6 +3,7 @@ const filter = {
     {hostEquals: 'teams.microsoft.com', pathPrefix: '/dl/launcher/'},
     {hostSuffix: '.zoom.us', pathPrefix: '/j/'},
     {pathEquals: '/SAML20/SP/ACS'},
+    {pathSuffix: '/auto-close'}
   ],
 };
 
@@ -29,6 +30,10 @@ const configs = {
     managed_domains_loaded: false,
     domains: new Set(),
   },
+  autoclose: {
+    enabled: true,
+    delay: 2,
+  }
 };
 
 /**
@@ -97,6 +102,8 @@ async function reloadConfig() {
     globalprotect: true,
     globalprotectdelay: 2,
     globalprotectdomains: [],
+    autoclose: true,
+    autoclosedelay: 2
   }).then((items) => {
     configs.teams.enabled = items.teams;
     configs.teams.delay = items.teamsdelay;
@@ -106,6 +113,8 @@ async function reloadConfig() {
     configs.globalprotect.enabled = items.globalprotect;
     configs.globalprotect.delay = items.globalprotectdelay;
     configs.globalprotect.user_domains = items.globalprotectdomains;
+    configs.autoclose.enabled = items.autoclose;
+    configs.autoclose.delay = items.autoclosedelay;
     console.debug('Local config loaded');
   });
 
@@ -193,6 +202,8 @@ chrome.webNavigation.onCompleted.addListener(async (tab) => {
       } else {
         console.debug('No config detected for global protect, skipping...');
       }
+    } else if (configs.autoclose.enabled && url.pathname.endsWith('/auto-close')) {
+      await closeTab(configs.autoclose.delay, 'autoclose', tab);
     }
   }
 }, filter);

@@ -10,6 +10,8 @@ function saveOptions() {
   let zoomdomains = document.getElementById('zoom-domains').value.trim();
   const teams = document.getElementById('teams').checked;
   const teamsdelay = Number(document.getElementById('teams-delay').value);
+  const autoclose = document.getElementById('autoclose').checked;
+  const autoclosedelay = Number(document.getElementById('autoclose-delay').value);
   const statuscontainer = document.getElementById('status');
   chrome.storage.local.set({
     globalprotect: globalprotect,
@@ -18,6 +20,8 @@ function saveOptions() {
     zoomdelay: zoomdelay,
     teams: teams,
     teamsdelay: teamsdelay,
+    autoclose: autoclose,
+    autoclosedelay: autoclosedelay
   }, function() {
     // Update status to let user know options were saved.
     const status = document.createElement('div');
@@ -107,6 +111,8 @@ function restoreOptions() {
     zoomdomains: [],
     teams: true,
     teamsdelay: 2,
+    autoclose: true,
+    autoclosedelay: 2
   }, function(items) {
     console.debug(items);
     document.getElementById('globalprotect').checked = items.globalprotect;
@@ -117,6 +123,8 @@ function restoreOptions() {
     document.getElementById('zoom-domains').value = items.zoomdomains.join('\n');
     document.getElementById('teams').checked = items.teams;
     document.getElementById('teams-delay').value = items.teamsdelay;
+    document.getElementById('autoclose').checked = items.autoclose;
+    document.getElementById('autoclose-delay').value = items.autoclosedelay;
   });
 
   chrome.storage.managed.get({

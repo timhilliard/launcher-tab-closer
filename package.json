@@ -3,9 +3,10 @@
     "lint": "eslint '*.js'"
   },
   "devDependencies": {
-    "eslint": ">=5.16.0",
+    "eslint": "8.x",
     "eslint-config-google": "^0.14.0",
-    "eslint-config-prettier": "^8.3.0"
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jsdoc": "^50.2.3"
   },
   "type": "module"
 }
