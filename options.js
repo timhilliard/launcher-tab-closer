@@ -21,7 +21,7 @@ function saveOptions() {
     teams: teams,
     teamsdelay: teamsdelay,
     autoclose: autoclose,
-    autoclosedelay: autoclosedelay
+    autoclosedelay: autoclosedelay,
   }, function() {
     // Update status to let user know options were saved.
     const status = document.createElement('div');
@@ -112,7 +112,7 @@ function restoreOptions() {
     teams: true,
     teamsdelay: 2,
     autoclose: true,
-    autoclosedelay: 2
+    autoclosedelay: 2,
   }, function(items) {
     console.debug(items);
     document.getElementById('globalprotect').checked = items.globalprotect;

@@ -3,7 +3,7 @@ const filter = {
     {hostEquals: 'teams.microsoft.com', pathPrefix: '/dl/launcher/'},
     {hostSuffix: '.zoom.us', pathPrefix: '/j/'},
     {pathEquals: '/SAML20/SP/ACS'},
-    {pathSuffix: '/auto-close'}
+    {pathSuffix: '/auto-close'},
   ],
 };
 
@@ -33,7 +33,7 @@ const configs = {
   autoclose: {
     enabled: true,
     delay: 2,
-  }
+  },
 };
 
 /**
@@ -103,7 +103,7 @@ async function reloadConfig() {
     globalprotectdelay: 2,
     globalprotectdomains: [],
     autoclose: true,
-    autoclosedelay: 2
+    autoclosedelay: 2,
   }).then((items) => {
     configs.teams.enabled = items.teams;
     configs.teams.delay = items.teamsdelay;
